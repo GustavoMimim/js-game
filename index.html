@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <canvas id="canvas" width="1664" height="936"
+    style="border: solid 1px black; margin: 0px auto; display: block; background-color: dimgrey;">
+</canvas>
+
+    <script>
+        var canvas;//o elemento canvas sobre o qual desenharemos
+        var ctx;//o "contexto" da canvas que será utilizado (2D ou 3D)
+        var dx = 50;//a taxa de variação (velocidade) horizontal do objeto
+        var x = 30;//posição horizontal do objeto (com valor inicial)
+        var y = 0;//posição vertical do objeto (com valor inicial)
+        var WIDTH = 12800;//largura da área retangular
+        var HEIGHT = 7200;//altura da área retangular
+        var tile1 = new Image();//Imagem que será carregada e desenhada na canvas
+        var posicao = 0;//Indicador da posição atual do personagem
+        var NUM_POSICOES = 5;//Quantidade de imagens que compõem o movimento
+        
+        function KeyDown(evt){
+            switch (evt.keyCode) {
+                case 37: //para esquerda
+                    if (x + dx < WIDTH){
+                        x -= 20;
+                    }
+                break;
+
+                case 38: //para cima
+                    if (x + dx < HEIGHT){
+                        y -= 20;
+                    }
+                break;
+
+                case 39:  //para direita
+                    if (x + dx < WIDTH){
+                        x += 20;
+                    }
+                break;
+
+                case 40: //para baixo
+                    
+                    if (x + dx < HEIGHT){
+                        y += 20;
+                    }
+                break;
+            }
+            
+        }
+        function Desenhar() {   
+            tile1.src = "img/mulher/PNG/2ruiva/caminhar/0.png";
+            ctx.drawImage(tile1, x, y);
+            
+        }
+
+        function LimparTela() {
+            ctx.fillStyle = "dimgrey";   
+            ctx.beginPath();
+            ctx.rect(0, 0, WIDTH, HEIGHT);
+            ctx.closePath();
+            ctx.fill();   
+        }
+
+        function Atualizar() {
+            LimparTela();    
+            Desenhar();
+            
+        }
+
+        function Iniciar() {
+            canvas = document.getElementById("canvas");
+            ctx = canvas.getContext("2d");
+            return setInterval(Atualizar, 1);
+        }
+
+        window.addEventListener('keydown', KeyDown);
+        Iniciar();
+
+   </script>
+
+</body>
+</html>
