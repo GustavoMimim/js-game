@@ -1,87 +1,156 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Game</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="js/jquery-3.3.1.min.js" type="text/javascript"></script>
 </head>
+
 <body>
-    <canvas id="canvas" width="1664" height="936"
-    style="border: solid 1px black; margin: 0px auto; display: block; background-color: dimgrey;">
-</canvas>
+    <canvas id="canvas" width="1664" height="936" style="border: solid 1px black; margin: 0px auto; display: block; background-color: dimgrey;"></canvas>
 
     <script>
-        var canvas;//o elemento canvas sobre o qual desenharemos
-        var ctx;//o "contexto" da canvas que será utilizado (2D ou 3D)
-        var dx = 50;//a taxa de variação (velocidade) horizontal do objeto
-        var x = 30;//posição horizontal do objeto (com valor inicial)
-        var y = 0;//posição vertical do objeto (com valor inicial)
-        var WIDTH = 12800;//largura da área retangular
-        var HEIGHT = 7200;//altura da área retangular
-        var tile1 = new Image();//Imagem que será carregada e desenhada na canvas
-        var posicao = 0;//Indicador da posição atual do personagem
-        var NUM_POSICOES = 5;//Quantidade de imagens que compõem o movimento
-        
-        function KeyDown(evt){
-            switch (evt.keyCode) {
-                case 37: //para esquerda
-                    if (x + dx < WIDTH){
-                        x -= 20;
-                    }
-                break;
+        var canvas; //Elemento do canvas para desenhar
+        var ctx; //O "contexto" da canvas que será utilizado (2D)
+        var dx = 10; //A taxa de variação (velocidade) do objeto
+        var x = 30; //Posição horizontal do objeto (com valor inicial)
+        var y = 30; //posição vertical do objeto (com valor inicial)
+        var WIDTH = 16640; //largura da área retangular
+        var HEIGHT = 9360; //Altura da área retangular
+        var tile1 = new Image(); //Imagem do personagem
+        var posicao = 0; //Indicador da posição atual do personagem
+        var NUM_POSICOES = 5; //Quantidade de imagens da animação
+        var pressDireita = false; //variável de comando para direita
+        var pressBaixo = false; //variável de comando para baixo
+        var pressCima = false; //variável de comando para cima
+        var pressEsquerda = false; //variável de comando para esquerda
+        var pressCorrer = false; //variável de comando para correr
 
-                case 38: //para cima
-                    if (x + dx < HEIGHT){
-                        y -= 20;
-                    }
-                break;
+        //Movimentação do personagem
+        function KeyDown(evt) {
 
-                case 39:  //para direita
-                    if (x + dx < WIDTH){
-                        x += 20;
-                    }
-                break;
+            //O evento keydown é acionado quando uma tecla é pressionada
+            $(document).keydown(function (evt) {
+                if (evt.which == 37)
+                    pressEsquerda = true; //Informando que Seta Esquerda está acionada
+                if (evt.which == 38)
+                    pressCima = true; //Informando que Seta Cima está acionada
+                if (evt.which == 39)
+                    pressDireita = true; //Informando que Seta Direita está acionada
+                if (evt.which == 40)
+                    pressBaixo = true; //Informando que Seta Baixo está acionada
+                if (evt.which == 16)
+                    pressCorrer = true; //Informando que tecla Shift está acionada (usada para fazer o personagem correr)
+            });
 
-                case 40: //para baixo
-                    
-                    if (x + dx < HEIGHT){
-                        y += 20;
-                    }
-                break;
+            //O evento Kyeup é acionado quando as teclas são soltas
+            $(document).keyup(function (evt) {
+                if (evt.which == 37)
+                    pressEsquerda = false; //Quando a tecla for solta é preciso informar que a Seta Esquerda não está pressionada
+                if (evt.which == 38)
+                    pressCima = false; //Quando a tecla for solta é preciso informar que a Seta Cima não está pressionada
+                if (evt.which == 39)
+                    pressDireita = false; //Quando a tecla for solta é preciso informar que a Seta Direita não está pressionada
+                if (evt.which == 40)
+                    pressBaixo = false; //Quando a tecla for solta é preciso informar que a Seta Baixo não está pressionada
+                if (evt.which == 16)
+                    pressCorrer = false; //Quando a tecla for solta é preciso informar que a tecla Shift não está pressionada
+            })
+
+            //Responsável pela animação do personagem principal
+            function Animação() {
+                posicao++;
+                if (posicao == NUM_POSICOES)
+                    posicao = 1;
             }
-            
+
+            //Movimento para a Esquerda
+            if (pressEsquerda == true && pressCima == false && pressDireita == false && pressBaixo == false) {
+                if (x + dx < WIDTH)
+                    x -= dx;
+                Animação();
+            }
+            //Movimento para Cima
+            if (pressCima == true && pressEsquerda == false && pressDireita == false && pressBaixo == false) {
+                if (x + dx < HEIGHT)
+                    y -= dx;
+                Animação();
+            }
+            //Movimento para a Direita
+            if (pressDireita == true && pressCima == false && pressEsquerda == false && pressBaixo == false) {
+                if (x + dx < WIDTH)
+                    x += dx;
+                Animação();
+            }
+            //Movimento para Baixo
+            if (pressBaixo == true && pressCima == false && pressDireita == false && pressEsquerda == false) {
+                if (x + dx < HEIGHT)
+                    y += dx;
+                Animação();
+            }
+
+            //Movimento para as diagonais
+            if (pressEsquerda == true && pressCima == true) { //Noroeste
+                x -= dx;
+                y -= dx;
+                Animação();
+            }
+
+            if (pressDireita == true && pressCima == true) { //Nordeste
+                x += dx;
+                y -= dx;
+                Animação();
+            }
+            if (pressDireita == true && pressBaixo == true) { //Sudeste
+                y += dx;
+                x += dx;
+                Animação();
+            }
+            if (pressEsquerda == true && pressBaixo == true) { //Sudoeste
+                x -= dx;
+                y += dx;
+                Animação();
+            }
         }
-        function Desenhar() {   
-            tile1.src = "img/mulher/PNG/2ruiva/caminhar/0.png";
-            ctx.drawImage(tile1, x, y);
-            
+
+        function Desenhar() {
+            if (pressCorrer == true) {
+                tile1.src = "img/mulher/PNG/2ruiva/correr/" + posicao + ".png";
+                ctx.drawImage(tile1, x, y);
+                return;
+            } else {
+                tile1.src = "img/mulher/PNG/2ruiva/caminhar/" + posicao + ".png";
+                ctx.drawImage(tile1, x, y);
+            }
         }
 
         function LimparTela() {
-            ctx.fillStyle = "dimgrey";   
+            ctx.fillStyle = "dimgrey";
             ctx.beginPath();
             ctx.rect(0, 0, WIDTH, HEIGHT);
             ctx.closePath();
-            ctx.fill();   
+            ctx.fill();
         }
 
         function Atualizar() {
-            LimparTela();    
+            LimparTela();
             Desenhar();
-            
         }
 
         function Iniciar() {
             canvas = document.getElementById("canvas");
             ctx = canvas.getContext("2d");
-            return setInterval(Atualizar, 1);
+            return setInterval(Atualizar, 0);
         }
 
         window.addEventListener('keydown', KeyDown);
         Iniciar();
 
-   </script>
+    </script>
 
 </body>
+
 </html>
