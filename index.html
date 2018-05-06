@@ -9,58 +9,67 @@
 </head>
 
 <body>
-    <canvas id="canvas" width="1664" height="936" style="border: solid 1px black; margin: 0px auto; display: block; background-color: dimgrey;"></canvas>
+    <canvas id="canvas" width="1280" height="800" style="border: solid 1px black; margin: 0px auto; display: block; background-color: dimgrey;"></canvas>
 
     <script>
+
         var canvas; //Elemento do canvas para desenhar
         var ctx; //O "contexto" da canvas que será utilizado (2D)
         var dx = 10; //A taxa de variação (velocidade) do objeto
         var x = 30; //Posição horizontal do objeto (com valor inicial)
         var y = 30; //posição vertical do objeto (com valor inicial)
-        var WIDTH = 16640; //largura da área retangular
-        var HEIGHT = 9360; //Altura da área retangular
+        var WIDTH = 12800; //largura da área do jogo
+        var HEIGHT = 8000; //Altura da área do jogo
         var tile1 = new Image(); //Imagem do personagem
         var posicao = 0; //Indicador da posição atual do personagem
-        var NUM_POSICOES = 5; //Quantidade de imagens da animação
-        var pressDireita = false; //variável de comando para direita
-        var pressBaixo = false; //variável de comando para baixo
-        var pressCima = false; //variável de comando para cima
-        var pressEsquerda = false; //variável de comando para esquerda
-        var pressCorrer = false; //variável de comando para correr
+        var NUM_POSICOES = 5; //Quantidade de imagens das animações
+        //Variáveis das teclas responsáveis pelo movimento do personagem
+        var pressDireita = false;
+        var pressBaixo = false;
+        var pressCima = false;
+        var pressEsquerda = false;
+        var pressCorrer = false;
+        var ladoEsquerdo = 0;
+        var ladoDireito = 0;
         //Movimentação do personagem
         function KeyDown(evt) {
+
             //O evento keydown é acionado quando uma tecla é pressionada
             $(document).keydown(function (evt) {
-                if (evt.which == 37)
-                    pressEsquerda = true; //Informando que Seta Esquerda está acionada
-                if (evt.which == 38)
-                    pressCima = true; //Informando que Seta Cima está acionada
-                if (evt.which == 39)
-                    pressDireita = true; //Informando que Seta Direita está acionada
-                if (evt.which == 40)
-                    pressBaixo = true; //Informando que Seta Baixo está acionada
+                if (evt.which == 37 || evt.which == 65)
+                    pressEsquerda = true; //Informando que tecla A ou Seta Esquerda está acionada
+                if (evt.which == 38 || evt.which == 87)
+                    pressCima = true;
+                if (evt.which == 39 || evt.which == 68)
+                    pressDireita = true;
+                if (evt.which == 40 || evt.which == 83)
+                    pressBaixo = true;
                 if (evt.which == 16)
                     pressCorrer = true; //Informando que tecla Shift está acionada (usada para fazer o personagem correr)
+                teclaAtual = evt.which;
             });
+
             //O evento Kyeup é acionado quando as teclas são soltas
             $(document).keyup(function (evt) {
-                if (evt.which == 37)
-                    pressEsquerda = false; //Quando a tecla for solta é preciso informar que a Seta Esquerda não está pressionada
-                if (evt.which == 38)
-                    pressCima = false; //Quando a tecla for solta é preciso informar que a Seta Cima não está pressionada
-                if (evt.which == 39)
-                    pressDireita = false; //Quando a tecla for solta é preciso informar que a Seta Direita não está pressionada
-                if (evt.which == 40)
-                    pressBaixo = false; //Quando a tecla for solta é preciso informar que a Seta Baixo não está pressionada
+                if (evt.which == 37 || evt.which == 65)
+                    pressEsquerda = false; //Informar que a Seta Esquerda ou a tecla A não está pressionada
+                if (evt.which == 38 || evt.which == 87)
+                    pressCima = false;
+                if (evt.which == 39 || evt.which == 68)
+                    pressDireita = false;
+                if (evt.which == 40 || evt.which == 83)
+                    pressBaixo = false;
                 if (evt.which == 16)
-                    pressCorrer = false; //Quando a tecla for solta é preciso informar que a tecla Shift não está pressionada
+                    pressCorrer = false;
             })
+
             //Responsável pela animação do personagem principal
             function Animação() {
                 posicao++;
                 if (posicao == NUM_POSICOES)
-                    posicao = 1;
+                    posicao = 0;
             }
+
             //Movimento para a Esquerda
             if (pressEsquerda == true && pressCima == false && pressDireita == false && pressBaixo == false) {
                 if (x + dx < WIDTH)
@@ -68,19 +77,19 @@
                 Animação();
             }
             //Movimento para Cima
-            if (pressCima == true && pressEsquerda == false && pressDireita == false && pressBaixo == false) {
+            else if (pressCima == true && pressEsquerda == false && pressDireita == false && pressBaixo == false) {
                 if (x + dx < HEIGHT)
                     y -= dx;
                 Animação();
             }
             //Movimento para a Direita
-            if (pressDireita == true && pressCima == false && pressEsquerda == false && pressBaixo == false) {
+            else if (pressDireita == true && pressCima == false && pressEsquerda == false && pressBaixo == false) {
                 if (x + dx < WIDTH)
                     x += dx;
                 Animação();
             }
             //Movimento para Baixo
-            if (pressBaixo == true && pressCima == false && pressDireita == false && pressEsquerda == false) {
+            else if (pressBaixo == true && pressCima == false && pressDireita == false && pressEsquerda == false) {
                 if (x + dx < HEIGHT)
                     y += dx;
                 Animação();
@@ -91,32 +100,96 @@
                 y -= dx;
                 Animação();
             }
-            if (pressDireita == true && pressCima == true) { //Nordeste
+            else if (pressDireita == true && pressCima == true) { //Nordeste
                 x += dx;
                 y -= dx;
                 Animação();
             }
-            if (pressDireita == true && pressBaixo == true) { //Sudeste
+            else if (pressDireita == true && pressBaixo == true) { //Sudeste
                 y += dx;
                 x += dx;
                 Animação();
             }
-            if (pressEsquerda == true && pressBaixo == true) { //Sudoeste
+            else if (pressEsquerda == true && pressBaixo == true) { //Sudoeste
                 x -= dx;
                 y += dx;
                 Animação();
             }
+
         }
+
         function Desenhar() {
-            if (pressCorrer == true) {
-                tile1.src = "img/mulher/PNG/2/correr/" + posicao + ".png";
+            //Posiciona a animação do personagem principal no lado direito
+            if (pressDireita == true) {
+                ladoEsquerdo = 0;
+                ladoDireito = 1;
+                if (pressCorrer == true) {
+                    tile1.src = "img/mulher/PNG/2/direita/correr/" + posicao + ".png";
+                    ctx.drawImage(tile1, x, y);
+                } else {
+                    tile1.src = "img/mulher/PNG/2/direita/caminhar/" + posicao + ".png";
+                    ctx.drawImage(tile1, x, y);
+                }
+            }
+            if (pressCima == true && ladoDireito == 1) {
+                if (pressCorrer == true) {
+                    tile1.src = "img/mulher/PNG/2/direita/correr/" + posicao + ".png";
+                    ctx.drawImage(tile1, x, y);
+                } else {
+                    tile1.src = "img/mulher/PNG/2/direita/caminhar/" + posicao + ".png";
+                    ctx.drawImage(tile1, x, y);
+                }
+            }
+            if (pressBaixo == true && ladoDireito == 1) {
+                if (pressCorrer == true) {
+                    tile1.src = "img/mulher/PNG/2/direita/correr/" + posicao + ".png";
+                    ctx.drawImage(tile1, x, y);
+                } else {
+                    tile1.src = "img/mulher/PNG/2/direita/caminhar/" + posicao + ".png";
+                    ctx.drawImage(tile1, x, y);
+                }
+            }
+            //Posiciona a animação do personagem principal no lado esquerdo
+            if (pressEsquerda == true) {
+                ladoDireito = 0;
+                ladoEsquerdo = 1;
+                if (pressCorrer == true) {
+                    tile1.src = "img/mulher/PNG/2/esquerda/correr/" + posicao + ".png";
+                    ctx.drawImage(tile1, x, y);
+                } else {
+                    tile1.src = "img/mulher/PNG/2/esquerda/caminhar/" + posicao + ".png";
+                    ctx.drawImage(tile1, x, y);
+                }
+            }
+            if (pressCima == true && ladoEsquerdo == 1) {
+                if (pressCorrer == true) {
+                    tile1.src = "img/mulher/PNG/2/esquerda/correr/" + posicao + ".png";
+                    ctx.drawImage(tile1, x, y);
+                } else {
+                    tile1.src = "img/mulher/PNG/2/esquerda/caminhar/" + posicao + ".png";
+                    ctx.drawImage(tile1, x, y);
+                }
+            }
+            if (pressBaixo == true && ladoEsquerdo == 1) {
+                if (pressCorrer == true) {
+                    tile1.src = "img/mulher/PNG/2/esquerda/correr/" + posicao + ".png";
+                    ctx.drawImage(tile1, x, y);
+                } else {
+                    tile1.src = "img/mulher/PNG/2/esquerda/caminhar/" + posicao + ".png";
+                    ctx.drawImage(tile1, x, y);
+                }
+            }
+
+            if (pressBaixo == false && pressCima == false && pressDireita == false && pressEsquerda == false && ladoEsquerdo == 1) {
+                tile1.src = "img/mulher/PNG/2/esquerda/parado/" + posicao + ".png";
                 ctx.drawImage(tile1, x, y);
-                return;
-            } else {
-                tile1.src = "img/mulher/PNG/2/caminhar/" + posicao + ".png";
+            } 
+            if (pressBaixo == false && pressCima == false && pressDireita == false && pressEsquerda == false && ladoDireito == 1){
+                tile1.src = "img/mulher/PNG/2/direita/parado/" + posicao + ".png";
                 ctx.drawImage(tile1, x, y);
             }
         }
+
         function LimparTela() {
             ctx.fillStyle = "dimgrey";
             ctx.beginPath();
