@@ -9,7 +9,9 @@
 </head>
 
 <body>
-    <canvas id="canvas" width="1280" height="800" style="border: solid 1px black; margin: 0px auto; display: block; background-color: dimgrey;"></canvas>
+
+    <canvas id="canvas" width="1280" height="800"
+        style="border: solid 1px black; margin: 0px auto; display: block; background-color: dimgrey;"></canvas>
 
     <script>
 
@@ -18,24 +20,66 @@
         var dx = 10; //A taxa de variação (velocidade) do objeto
         var x = 30; //Posição horizontal do objeto (com valor inicial)
         var y = 30; //posição vertical do objeto (com valor inicial)
-        var WIDTH = 12800; //largura da área do jogo
-        var HEIGHT = 8000; //Altura da área do jogo
+        var WIDTH = 1280; //largura da área do jogo
+        var HEIGHT = 800; //Altura da área do jogo
         var tile1 = new Image(); //Imagem do personagem
         tile1.src = "img/mulher/PNG/2/direita/parado/0.png"
         var posicao = 0; //Indicador da posição atual do personagem
-        var NUM_POSICOES = 5; //Quantidade de imagens das animações
+        var posicaoParado = 0;
+        var posicaoAtaque = 0;
+        var NUM_POSICOES = 5; //Quantidade de frames das animações
         //Variáveis das teclas responsáveis pelo movimento do personagem
         var pressDireita = false;
         var pressBaixo = false;
         var pressCima = false;
         var pressEsquerda = false;
         var pressCorrer = false;
-        //Variáveis para auxiliar na animação do personagem
-        var ladoEsquerdo = 0;
-        var ladoDireito = 0;
+        var ultimoLado = 0; // 0 = esquerda; 1 = direita
         var click = false;
+        var animacaoAtaque = false;
+        var segundosAtaque = new Date;
 
-        //Responsável por designar a ordem de animação correta do personagem principal
+        //Responsável por exibir os frames da animação do personagem principal quando está atacando
+        function AnimaçãoAtaque() {
+
+            if (animacaoAtaque == false) {
+
+                animacaoAtaque = true;
+
+                if (ultimoLado == 0) {
+                    //exibe a animação de ataque para o lado esquerdo
+                    tile1.src = "img/mulher/PNG/2/esquerda/ataque/" + posicaoAtaque + ".png";
+                    ctx.drawImage(tile1, x, y);
+                } else {
+                    //exibe a animação de ataque para o lado direito
+                    tile1.src = "img/mulher/PNG/2/direita/ataque/" + posicaoAtaque + ".png";
+                    ctx.drawImage(tile1, x, y);
+                }
+
+                animacaoAtaque = false;
+
+            }
+        }
+
+        //Responsável por designar a ordem de animação quando o personagem principal está parado
+        function contagemDaAnimaçãoAtaque() {
+            console.log(click);
+            if (click == true) {
+                AnimaçãoAtaque();
+                posicaoAtaque++;
+                if (posicaoAtaque == NUM_POSICOES)
+                    posicaoAtaque = 0;
+            }
+        }
+
+        //Responsável por designar a ordem de animação quando o personagem principal está parado
+        function contagemDaAnimaçãoParado() {
+            posicaoParado++;
+            if (posicaoParado == NUM_POSICOES)
+                posicaoParado = 0;
+        }
+
+        //Responsável por designar a ordem de animação quando o personagem principal está andando ou correndo
         function contagemDaAnimação() {
             posicao++;
             if (posicao == NUM_POSICOES)
@@ -44,6 +88,7 @@
 
         //Movimentação do personagem com teclado/mouse
         function Comandos(evt) {
+
 
             //O evento mousedown é acionado quando o jogador da um click na tela
             $(document).mousedown(function (evt) {
@@ -55,14 +100,22 @@
                 click = false;
             });
 
+            if (animacaoAtaque == true) {
+                return;
+            }
+
             //O evento keydown é acionado quando uma tecla é pressionada
             $(document).keydown(function (evt) {
-                if (evt.which == 37 || evt.which == 65)
+                if (evt.which == 37 || evt.which == 65) {
                     pressEsquerda = true; //Informando que tecla A ou Seta Esquerda está acionada
+                    ultimoLado = 0; //Informando que o último direcionamento do personagem foi para o lado esquerdo
+                }
                 if (evt.which == 38 || evt.which == 87)
                     pressCima = true;
-                if (evt.which == 39 || evt.which == 68)
-                    pressDireita = true;
+                if (evt.which == 39 || evt.which == 68) {
+                    pressDireita = true; //Informando que tecla D ou Seta Direita está acionada
+                    ultimoLado = 1; //Informando que o último direcionamento do personagem foi para o lado direito
+                }
                 if (evt.which == 40 || evt.which == 83)
                     pressBaixo = true;
                 if (evt.which == 16) {
@@ -74,11 +127,11 @@
             //O evento Kyeup é acionado quando as teclas são soltas
             $(document).keyup(function (evt) {
                 if (evt.which == 37 || evt.which == 65)
-                    pressEsquerda = false; //Informar que a Seta Esquerda ou a tecla A não está pressionada
+                    pressEsquerda = false; //Informar que a Seta Esquerda ou a tecla A não está mais pressionada
                 if (evt.which == 38 || evt.which == 87)
                     pressCima = false;
                 if (evt.which == 39 || evt.which == 68)
-                    pressDireita = false;
+                    pressDireita = false; //Informando que tecla D ou Seta Direita não está mais pressionada
                 if (evt.which == 40 || evt.which == 83)
                     pressBaixo = false;
                 if (evt.which == 16) {
@@ -91,132 +144,96 @@
             if (pressEsquerda == true && pressCima == false && pressDireita == false && pressBaixo == false) {
                 if (x + dx < WIDTH)
                     x -= dx;
-                contagemDaAnimação();
             }
             //Movimento para Cima
             else if (pressCima == true && pressEsquerda == false && pressDireita == false && pressBaixo == false) {
                 if (x + dx < HEIGHT)
                     y -= dx;
-                contagemDaAnimação();
             }
             //Movimento para a Direita
             else if (pressDireita == true && pressCima == false && pressEsquerda == false && pressBaixo == false) {
                 if (x + dx < WIDTH)
                     x += dx;
-                contagemDaAnimação();
             }
             //Movimento para Baixo
             else if (pressBaixo == true && pressCima == false && pressDireita == false && pressEsquerda == false) {
                 if (x + dx < HEIGHT)
                     y += dx;
-                contagemDaAnimação();
             }
             //Movimento para as diagonais
             if (pressEsquerda == true && pressCima == true) { //Noroeste
                 x -= dx;
                 y -= dx;
-                contagemDaAnimação();
             }
             else if (pressDireita == true && pressCima == true) { //Nordeste
                 x += dx;
                 y -= dx;
-                contagemDaAnimação();
             }
             else if (pressDireita == true && pressBaixo == true) { //Sudeste
                 y += dx;
                 x += dx;
-                contagemDaAnimação();
             }
             else if (pressEsquerda == true && pressBaixo == true) { //Sudoeste
                 x -= dx;
                 y += dx;
-                contagemDaAnimação();
             }
+
+            contagemDaAnimação();
 
         }//Fim do Comandos()
 
         function Desenhar() {
-            //Posiciona a animação do personagem principal no lado direito
-            if (pressDireita == true) {
-                ladoEsquerdo = 0;
-                ladoDireito = 1;
-                if (pressCorrer == true) {
-                    tile1.src = "img/mulher/PNG/2/direita/correr/" + posicao + ".png";
-                    ctx.drawImage(tile1, x, y);
-                } else {
-                    tile1.src = "img/mulher/PNG/2/direita/caminhar/" + posicao + ".png";
-                    ctx.drawImage(tile1, x, y);
-                }
-            }
-            if (pressCima == true && ladoDireito == 1) {
-                if (pressCorrer == true) {
-                    tile1.src = "img/mulher/PNG/2/direita/correr/" + posicao + ".png";
-                    ctx.drawImage(tile1, x, y);
-                } else {
-                    tile1.src = "img/mulher/PNG/2/direita/caminhar/" + posicao + ".png";
-                    ctx.drawImage(tile1, x, y);
-                }
-            }
-            if (pressBaixo == true && ladoDireito == 1) {
-                if (pressCorrer == true) {
-                    tile1.src = "img/mulher/PNG/2/direita/correr/" + posicao + ".png";
-                    ctx.drawImage(tile1, x, y);
-                } else {
-                    tile1.src = "img/mulher/PNG/2/direita/caminhar/" + posicao + ".png";
-                    ctx.drawImage(tile1, x, y);
-                }
-            }
-            //Posiciona a animação do personagem principal no lado esquerdo
-            if (pressEsquerda == true) {
-                ladoDireito = 0;
-                ladoEsquerdo = 1;
-                if (pressCorrer == true) {
-                    tile1.src = "img/mulher/PNG/2/esquerda/correr/" + posicao + ".png";
-                    ctx.drawImage(tile1, x, y);
-                } else {
-                    tile1.src = "img/mulher/PNG/2/esquerda/caminhar/" + posicao + ".png";
-                    ctx.drawImage(tile1, x, y);
-                }
-            }
-            if (pressCima == true && ladoEsquerdo == 1) {
-                if (pressCorrer == true) {
-                    tile1.src = "img/mulher/PNG/2/esquerda/correr/" + posicao + ".png";
-                    ctx.drawImage(tile1, x, y);
-                } else {
-                    tile1.src = "img/mulher/PNG/2/esquerda/caminhar/" + posicao + ".png";
-                    ctx.drawImage(tile1, x, y);
-                }
-            }
-            if (pressBaixo == true && ladoEsquerdo == 1) {
-                if (pressCorrer == true) {
-                    tile1.src = "img/mulher/PNG/2/esquerda/correr/" + posicao + ".png";
-                    ctx.drawImage(tile1, x, y);
-                } 
-                if(pressCorrer == false) {
-                    tile1.src = "img/mulher/PNG/2/esquerda/caminhar/" + posicao + ".png";
-                    ctx.drawImage(tile1, x, y);
-                }
-            }
-            //Exibi a animação direcionada ao ultimo lado em que o personagem parou
-            if (pressBaixo == false && pressCima == false && pressDireita == false && pressEsquerda == false && ladoEsquerdo == 1) {
-                tile1.src = "img/mulher/PNG/2/esquerda/parado/" + posicao + ".png";
-                ctx.drawImage(tile1, x, y);
+
+
+
+            if (animacaoAtaque == true) {
+                return;
             }
 
-            if (pressBaixo == false && pressCima == false && pressDireita == false && pressEsquerda == false && ladoDireito == 1) {
-                tile1.src = "img/mulher/PNG/2/direita/parado/" + posicao + ".png";
-                ctx.drawImage(tile1, x, y);
-            }
-            //Animação de ataque
-            if (pressBaixo == false && pressCima == false && pressDireita == false && pressEsquerda == false && click == true && ladoDireito == 1) {
-                tile1.src = "img/mulher/PNG/2/direita/ataque/" + posicao + ".png";
-                ctx.drawImage(tile1, x, y);
-            }
-            if (pressBaixo == false && pressCima == false && pressDireita == false && pressEsquerda == false && click == true && ladoEsquerdo == 1) {
-                tile1.src = "img/mulher/PNG/2/esquerda/ataque/" + posicao + ".png";
-                ctx.drawImage(tile1, x, y);
-            }
+            //Verifica se a animação deve ser a que o personagem está se movimentando
+            if (pressBaixo == true || pressCima == true || pressDireita == true || pressEsquerda == true) {
+                //Verifica o lado correto da animação
+                //se for para o lado esquerdo
+                if (ultimoLado == 0) {
+                    //Se estiver correndo
+                    if (pressCorrer == true) {
+                        tile1.src = "img/mulher/PNG/2/esquerda/correr/" + posicao + ".png";
+                        ctx.drawImage(tile1, x, y);
+                    } else {
+                        tile1.src = "img/mulher/PNG/2/esquerda/caminhar/" + posicao + ".png";
+                        ctx.drawImage(tile1, x, y);
+                    }
+                    //se for para o lado direito
+                } else {
+                    //Se estiver correndo
+                    if (pressCorrer == true) {
+                        tile1.src = "img/mulher/PNG/2/direita/correr/" + posicao + ".png";
+                        ctx.drawImage(tile1, x, y);
+                    } else {
+                        tile1.src = "img/mulher/PNG/2/direita/caminhar/" + posicao + ".png";
+                        ctx.drawImage(tile1, x, y);
+                    }
+                }
+                //Se o personagem não estiver se movimentando
+            } else {
+                //Verifica se está parado
+                if (click == false) {
 
+                    //exibe a animação para o lado esquerdo
+                    if (ultimoLado == 0) {
+                        tile1.src = "img/mulher/PNG/2/esquerda/parado/" + posicaoParado + ".png";
+                        ctx.drawImage(tile1, x, y);
+                    }
+                    //exibe a animação para o lado direito
+                    if (ultimoLado == 1) {
+                        tile1.src = "img/mulher/PNG/2/direita/parado/" + posicaoParado + ".png";
+                        ctx.drawImage(tile1, x, y);
+                    }
+                    //Verifica se está atacando
+                } else {
+                    AnimaçãoAtaque();
+                }
+            }
         }//Fim do Desenhar()
 
         function LimparTela() {
@@ -226,6 +243,7 @@
             ctx.closePath();
             ctx.fill();
         }
+
         function Atualizar() {
             LimparTela();
             Desenhar();
@@ -234,10 +252,14 @@
         function Iniciar() {
             canvas = document.getElementById("canvas");
             ctx = canvas.getContext("2d");
-            return setInterval(Atualizar, 0);
+            setInterval(contagemDaAnimaçãoAtaque, 70);
+            setInterval(contagemDaAnimaçãoParado, 70);
+            return setInterval(Atualizar, 10);
         }
+
         window.addEventListener('keydown', Comandos);
         Iniciar();
+
     </script>
 
 </body>
